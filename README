@@ -1,0 +1,4 @@
+django-legal-editions is a Django reusable app for handling editions
+of historical (legal) texts. It is a modified version of part of the
+code behind the Early English Laws project, viewable at
+http://earlyenglishlaws.ac.uk/
