@@ -142,6 +142,7 @@ class WorkAdmin (admin.ModelAdmin):
 
 
 admin.site.register(edition_models.Archive, ArchiveAdmin)
+admin.site.register(edition_models.Commentary)
 admin.site.register(edition_models.Edition, EditionAdmin)
 admin.site.register(edition_models.EditionStatus)
 admin.site.register(edition_models.Editor, EditorAdmin)
