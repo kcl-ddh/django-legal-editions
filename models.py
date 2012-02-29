@@ -31,6 +31,10 @@ class Commentary (models.Model):
     class Meta:
         verbose_name_plural = 'Commentaries'
 
+    def __unicode__ (self):
+        return 'Commentary by %s on %s in %s' % (self.user, self.element_id,
+                                                 self.edition)
+
 
 class Edition (models.Model):
 
