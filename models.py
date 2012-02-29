@@ -36,6 +36,7 @@ class Edition (models.Model):
 
     date = FuzzyDateField(blank=True, modifier=True, null=True)
     text = models.TextField(blank=True)
+    translation = models.TextField(blank=True)
     abbreviation = models.CharField(max_length=32)
     internal_notes = models.TextField(blank=True, help_text='Internal notes associated with this edition. They will not appear on the website.')
     introduction = models.TextField(blank=True)
@@ -63,12 +64,6 @@ class EditionStatus (models.Model):
 
     def __unicode__ (self):
         return self.name
-
-
-class EditionTranslation (models.Model):
-
-    text = models.TextField()
-    edition = models.ForeignKey('Edition', unique=True)
 
 
 class Editor (models.Model):
@@ -135,7 +130,8 @@ class Manuscript (models.Model):
     hide_folio_numbers = models.BooleanField(help_text='Tick this box if the folio or page numbers should not appear on the website. To appear on the website, all folio images must have a folio or page number assigned to them in the datatabase. When the folios have no real/actual number this requirement forces you to provide abritrary numbers anyway. In that case, ticking this box will hide this arbitrary number on the site.')
     standard_edition = models.BooleanField(help_text='Tick this box if this document is a standard edition.')
     archive = models.ForeignKey('Archive')
-    sigla_provenance = models.ForeignKey('SiglaProvenance')
+    sigla_provenance = models.ForeignKey('SiglaProvenance', blank=True,
+                                         null=True)
 
     def get_type_label (self):
         label = 'manuscript'
@@ -158,8 +154,17 @@ class Person (models.Model):
     
     name = models.CharField(max_length=128, unique=True)
 
+    class Meta:
+        verbose_name_plural = 'People'
+
     def __unicode__ (self):
         return self.name
+
+
+class King (Person):
+
+    beginning_regnal_year = FuzzyDateField(blank=True, modifier=True, null=True)
+    end_regnal_year = FuzzyDateField(blank=True, modifier=True, null=True)
 
 
 class SiglaProvenance (models.Model):
@@ -176,6 +181,8 @@ class TextAttribute (models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'Text Attribute'
+        verbose_name_plural = 'Text Attributes'
 
     def __unicode__ (self):
         return self.name
@@ -185,13 +192,14 @@ class Version (models.Model):
 
     standard_abbreviation = models.CharField(max_length=32, unique=True)
     synopsis = models.TextField(blank=True)
-    name = models.CharField(blank=True, max_length=128)
+    name = models.CharField(blank=True, help_text="Leave empty if the name is the same as the Work's name", max_length=128)
     slug = models.SlugField(max_length=250)
     print_editions = models.TextField(blank=True)
     synopsis_manuscripts = models.TextField(blank=True)
     date = FuzzyDateField(blank=True, modifier=True, null=True)
     graph = models.TextField(blank=True)
     work = models.ForeignKey('Work')
+    witnesses = models.ManyToManyField('Witness')
     languages = models.ManyToManyField('Language')
 
     class Meta:
@@ -244,7 +252,6 @@ class Witness (models.Model):
     hide_from_listings = models.BooleanField(help_text='Hide this witness from the manuscript listings on the webiste.')
     manuscript = models.ForeignKey('Manuscript')
     work = models.ForeignKey('Work')
-    versions = models.ManyToManyField('Version')
     languages = models.ManyToManyField('Language')
 
     class Meta:
@@ -256,26 +263,26 @@ class Witness (models.Model):
 
 class WitnessTranscription (models.Model):
 
-    text = models.TextField()
-    witness = models.ForeignKey('Witness', unique=True)
+    """Each witness transcription is associated with a particular
+    edition, to allow an editor to make their own decisions."""
+
+    witness = models.ForeignKey('Witness')
+    edition = models.ForeignKey('Edition')
+    transcription = models.TextField()
+    translation = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = (('witness', 'edition'),)
 
     def __unicode__ (self):
         return u'Transcription of %s' % self.witness.manuscript.sigla
-
-
-class WitnessTranslation (models.Model):
-
-    text = models.TextField()
-    transcription = models.ForeignKey('WitnessTranscription', unique=True)
-
-    def __unicode__ (self):
-        return u'Translation of %s' % self.transcription.witness.manuscript.sigla
 
 
 class Work (models.Model):
 
     name = models.CharField(max_length=128, unique=True)
     date = FuzzyDateField(blank=True, modifier=True, null=True)
+    king = models.ForeignKey('King', blank=True, null=True)
     text_attributes = models.ManyToManyField('TextAttribute')
 
     class Meta:
