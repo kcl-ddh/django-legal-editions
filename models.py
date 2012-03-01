@@ -7,6 +7,8 @@ from fuzzydate import FuzzyDateField
 
 class Archive (models.Model):
 
+    """Stores details of an archive that holds manuscripts."""
+
     name = models.CharField(max_length=128)
     city = models.CharField(max_length=128)
     country = models.CharField(blank=True, max_length=128)
@@ -20,6 +22,9 @@ class Archive (models.Model):
 
 
 class Commentary (models.Model):
+
+    """Stores user-submitted commentary on a particular part of an
+    :model:`legal_editions.Edition`. Related to :model:`auth.User`."""
 
     text = models.TextField()
     user = models.ForeignKey(User, help_text='User (editor or registered user) who submitted this comment.')
@@ -61,6 +66,8 @@ class Edition (models.Model):
 
 class EditionStatus (models.Model):
 
+    """Stores a status of an edition, such as "draft" or "published"."""
+
     name = models.CharField(max_length=32, unique=True)
 
     class Meta:
@@ -71,6 +78,8 @@ class EditionStatus (models.Model):
 
 
 class Editor (models.Model):
+
+    """Stores the name and abbreviation of an editor."""
 
     first_name = models.CharField(blank=True, max_length=32)
     last_name = models.CharField(blank=True, max_length=32)
@@ -84,6 +93,7 @@ class FolioImage (models.Model):
     batch = models.CharField(blank=True, max_length=32)
     folio_number = models.CharField(blank=True, help_text='Folio number. Leavy empty if unknown. Do not include r/v information.', max_length=8)
     page = models.CharField(blank=True, help_text='Archive page number. Leave empty if not available.', max_length=8)
+    display_order = models.IntegerField(blank=True, help_text='Optional. This number indicates in which order this folio will appear in a sequential reading of the manuscript. The value is relative to the display order of the other folio images.', null=True)
     internal_notes = models.TextField(blank=True)
     path = models.CharField(blank=True, max_length=128)
     filename_sort_order = models.IntegerField(blank=True, null=True)
@@ -103,7 +113,7 @@ class FolioSide (models.Model):
         return self.name
 
 
-class Hyparchetype (models.Model):
+class Hyperarchetype (models.Model):
 
     sigla = models.CharField(max_length=32)
     description = models.TextField(blank=True)
@@ -115,6 +125,8 @@ class Hyparchetype (models.Model):
 
 class Language (models.Model):
 
+    """Stores a language."""
+
     name = models.CharField(max_length=32, unique=True)
     colour = models.CharField(blank=True, max_length=8)
 
@@ -123,6 +135,10 @@ class Language (models.Model):
 
 
 class Manuscript (models.Model):
+
+    """Stores details of a manuscript. Related to
+    :model:`legal_editions.Archive` and
+    :model:`legal_editions.SiglaProvenance`."""
 
     shelf_mark = models.CharField(max_length=128)
     description = models.TextField(blank=True)
@@ -166,6 +182,9 @@ class Person (models.Model):
 
 
 class King (Person):
+
+    """Stores details about a king, related when appropriate to a
+    :model:`legal_editions.Work`."""
 
     beginning_regnal_year = FuzzyDateField(blank=True, modifier=True, null=True)
     end_regnal_year = FuzzyDateField(blank=True, modifier=True, null=True)
@@ -229,6 +248,10 @@ class Version (models.Model):
 
 class VersionRelationship (models.Model):
 
+    """Stores a directed relationship between two versions. Related to
+    :model:`legal_editions.Version` and
+    :model:`legal_editions.VersionRelationshipType`."""
+
     description = models.TextField(blank=True)
     source = models.ForeignKey('Version',
                                related_name='source_version_relationships')
@@ -239,6 +262,8 @@ class VersionRelationship (models.Model):
 
 class VersionRelationshipType (models.Model):
 
+    """Stores a type of relationship between versions."""
+
     name = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True)
 
@@ -247,6 +272,11 @@ class VersionRelationshipType (models.Model):
 
 
 class Witness (models.Model):
+
+    """Stores details of a witness to a work in a manuscript. Related
+    to :model:`legal_editions.Manuscript`,
+    :model:`legal_editions.Work` and
+    :model:`legal_editions.Language`."""
 
     range_start = models.CharField(blank=True, help_text="The page/folio number in the source document that correspond to the beginning of the text. (e.g. '10' or '30r').", max_length=8)
     range_end = models.CharField(blank=True, help_text="The page/folio number in the source document that correspond to the end of the text. (e.g. '15' or '41v').", max_length=8)
@@ -283,6 +313,9 @@ class WitnessTranscription (models.Model):
 
 
 class Work (models.Model):
+
+    """A Work is an abstraction of a text, as divorced from any
+    particular instance of that text."""
 
     name = models.CharField(max_length=128, unique=True)
     date = FuzzyDateField(blank=True, modifier=True, null=True)

@@ -18,9 +18,9 @@ class EditorsInline (admin.TabularInline):
     verbose_name_plural = 'Editors'
 
 
-class HyparchetypeInline (admin.TabularInline):
+class HyperarchetypeInline (admin.TabularInline):
 
-    model = edition_models.Hyparchetype
+    model = edition_models.Hyperarchetype
 
 
 class TextAttributeInline (admin.TabularInline):
@@ -50,11 +50,6 @@ class WitnessTranscriptionInline (admin.TabularInline):
     model = edition_models.WitnessTranscription
 
 
-class ArchiveAdmin (admin.ModelAdmin):
-
-    pass
-
-
 class EditionAdmin (admin.ModelAdmin):
 
     fieldsets = (
@@ -62,7 +57,7 @@ class EditionAdmin (admin.ModelAdmin):
         ('Introduction', {'fields': ('introduction',)}),
         ('Texts', {'fields': ('text', 'translation')}),
         ('Further information', {'fields': ('internal_notes',)}),)
-    inlines = [EditorsInline, HyparchetypeInline, WitnessTranscriptionInline]
+    inlines = [EditorsInline, HyperarchetypeInline, WitnessTranscriptionInline]
 
 
 class EditorAdmin (admin.ModelAdmin):
@@ -76,9 +71,20 @@ class EditorAdmin (admin.ModelAdmin):
     search_fields = list_display
 
 
-class HyparchetypeAdmin (admin.ModelAdmin):
+class FolioImageAdmin (admin.ModelAdmin):
 
-    pass
+    fieldsets = (
+        ('Image file', {'fields': ('filename', 'batch', 'path', 'filepath')}),
+        ('Manuscript', {'fields': ('manuscript', 'folio_number', 'folio_side',
+                                   'page', 'display_order')}),
+        ('Archival', {'fields': ('archived',)}),
+        ('Notes', {'fields': ('internal_notes',)}))
+    list_display = ('id', 'batch', 'path', 'filename', 'folio_number', 'page',
+                    'archived')
+    list_display_links = list_display
+    list_per_page = 300
+    ordering = ('batch', 'path', 'filename')
+    search_fields = ('archived', 'batch', 'manuscript', 'path')
 
 
 class ManuscriptAdmin (admin.ModelAdmin):
@@ -141,13 +147,14 @@ class WorkAdmin (admin.ModelAdmin):
     list_filter = ['text_attributes']
 
 
-admin.site.register(edition_models.Archive, ArchiveAdmin)
+admin.site.register(edition_models.Archive)
 admin.site.register(edition_models.Commentary)
 admin.site.register(edition_models.Edition, EditionAdmin)
 admin.site.register(edition_models.EditionStatus)
 admin.site.register(edition_models.Editor, EditorAdmin)
+admin.site.register(edition_models.FolioImage, FolioImageAdmin)
 admin.site.register(edition_models.FolioSide)
-admin.site.register(edition_models.Hyparchetype, HyparchetypeAdmin)
+admin.site.register(edition_models.Hyperarchetype)
 admin.site.register(edition_models.King)
 admin.site.register(edition_models.Language)
 admin.site.register(edition_models.Manuscript, ManuscriptAdmin)
